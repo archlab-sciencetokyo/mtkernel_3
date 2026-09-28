@@ -1,0 +1,30 @@
+# Object files and dependencies
+*.o
+*.d
+
+# Executables and build output
+*.elf
+*.bin
+*.map
+*.hex
+*.lst
+*.obj
+*.a
+*.dtb
+
+# Debug, trace, and log files
+*.log
+*.txt
+trace/
+trace_snippet*
+traplog*
+sim_out*
+out.txt
+
+# OS/IDE
+.DS_Store
+.vscode/
+
+# Gemini files
+.gemini_notes.md
+.gemini/

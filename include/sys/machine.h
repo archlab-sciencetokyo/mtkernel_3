@@ -49,6 +49,13 @@
 
 #endif
 
+#ifdef _IOTE_RISCV_
+#include "sysdepend/iote_riscv/machine.h"
+
+#define Csym(sym) sym
+
+#endif
+
 /* ===== C compiler dependencies definitions ============================= */
 
 #ifdef __GNUC__
