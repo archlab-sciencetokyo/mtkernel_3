@@ -115,11 +115,13 @@ l_dispatch_loop:
 	bne	t3, zero, l_no_lowpow
 
 	/* Enable interrupts before low_pow to allow wake-up */
+	li	t0, 8
 	csrrs	x0, mstatus, t0
 	call	Csym(low_pow)
 	j	l_dispatch_loop
 
 l_no_lowpow:
+	li	t0, 8
 	csrrs	x0, mstatus, t0
 	wfi
 	j	l_dispatch_loop
@@ -136,6 +138,8 @@ l_dispatch_switch:
 	lw	t0, 0(sp)		/* pc */
 	csrw	mepc, t0
 	lw	t0, 4(sp)		/* mstatus */
+	li	t1, 0x1800		/* Force MPP = 3 (Machine Mode) */
+	or	t0, t0, t1
 	csrw	mstatus, t0
 
 	/* Restore registers */
@@ -178,6 +182,7 @@ l_dispatch_switch:
 	addi	sp, sp, 132
 	mret
 
+	.p2align 2
 Csym(knl_trap_handler):
 	/* Save context to task stack */
 	/* Allocate stack frame */
@@ -293,6 +298,9 @@ l_skip_sp_restore:
 	beq	t1, t2, l_trap_return
 
 	/* Yes, we need to dispatch */
+	/* If ctxtsk (t1) is NULL, we don't need to save task context, just dispatch */
+	beq	t1, zero, l_dispatch_loop
+
 	/* Save the task sp to ctxtsk->tskctxb.ssp, clear ctxtsk, and jump to l_dispatch_loop */
 	sw	sp, 24(t1)		/* ctxtsk->tskctxb.ssp = sp */
 	la	t0, Csym(knl_ctxtsk)
@@ -304,6 +312,8 @@ l_trap_return:
 	lw	t0, 0(sp)		/* pc */
 	csrw	mepc, t0
 	lw	t1, 4(sp)		/* mstatus */
+	li	t0, 0x1800		/* Force MPP = 3 (Machine Mode) */
+	or	t1, t1, t0
 	csrw	mstatus, t1
 
 	/* Restore registers */
