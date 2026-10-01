@@ -21,6 +21,8 @@
 
 #include "limits.h"
 
+#define MEM_ADDR_T unsigned long
+
 /*
  * Memory allocation management information
  *
@@ -42,7 +44,7 @@ typedef struct {
 /*
  * Compensation for aligning "&areaque" position to 2 bytes border
  */
-#define AlignIMACB(imacb)	( (IMACB*)((UW)(imacb) & ~0x00000001UL) )
+#define AlignIMACB(imacb)	( (IMACB*)((MEM_ADDR_T)(imacb) & ~1UL) )
 
 /*
  * Minimum unit of subdivision
@@ -51,7 +53,7 @@ typedef struct {
  *	AreaQue uses the lower 1 bit for flag.
  */
 #define ROUNDSZ		( sizeof(QUEUE) )	/* 8 bytes */
-#define ROUND(sz)	( ((UW)(sz) + (UW)(ROUNDSZ-1)) & ~(UW)(ROUNDSZ-1) )
+#define ROUND(sz)	( ((MEM_ADDR_T)(sz) + (MEM_ADDR_T)(ROUNDSZ-1)) & ~(MEM_ADDR_T)(ROUNDSZ-1) )
 
 /* Minimum fragment size */
 #define MIN_FRAGMENT	( sizeof(QUEUE) * 2 )
@@ -69,7 +71,7 @@ Inline W roundSize( W sz )
 	if ( sz < (W)MIN_FRAGMENT ) {
 		sz = (W)MIN_FRAGMENT;
 	}
-	return (W)(((UW)sz + (UW)(ROUNDSZ-1)) & ~(UW)(ROUNDSZ-1));
+	return (W)(((MEM_ADDR_T)sz + (MEM_ADDR_T)(ROUNDSZ-1)) & ~(MEM_ADDR_T)(ROUNDSZ-1));
 }
 
 
@@ -79,17 +81,17 @@ Inline W roundSize( W sz )
 #define AREA_USE	0x00000001UL	/* In-use */
 #define AREA_MASK	0x00000001UL
 
-#define setAreaFlag(q, f)   ( (q)->prev = (QUEUE*)((UW)(q)->prev |  (UW)(f)) )
-#define clrAreaFlag(q, f)   ( (q)->prev = (QUEUE*)((UW)(q)->prev & ~(UW)(f)) )
-#define chkAreaFlag(q, f)   ( ((UW)(q)->prev & (UW)(f)) != 0 )
+#define setAreaFlag(q, f)   ( (q)->prev = (QUEUE*)((MEM_ADDR_T)(q)->prev |  (MEM_ADDR_T)(f)) )
+#define clrAreaFlag(q, f)   ( (q)->prev = (QUEUE*)((MEM_ADDR_T)(q)->prev & ~(MEM_ADDR_T)(f)) )
+#define chkAreaFlag(q, f)   ( ((MEM_ADDR_T)(q)->prev & (MEM_ADDR_T)(f)) != 0 )
 
-#define Mask(x)		( (QUEUE*)((UW)(x) & ~AREA_MASK) )
-#define Assign(x, y)	( (x) = (QUEUE*)(((UW)(x) & AREA_MASK) | (UW)(y)) )
+#define Mask(x)		( (QUEUE*)((MEM_ADDR_T)(x) & ~((MEM_ADDR_T)AREA_MASK)) )
+#define Assign(x, y)	( (x) = (QUEUE*)(((MEM_ADDR_T)(x) & AREA_MASK) | (MEM_ADDR_T)(y)) )
 /*
  * Area size
  */
 #define AreaSize(aq)	( (VB*)(aq)->next - (VB*)((aq) + 1) )
-#define FreeSize(fq)	( (W)((fq) + 1)->prev )
+#define FreeSize(fq)	( (W)(MEM_ADDR_T)((fq) + 1)->prev )
 
 
 IMPORT QUEUE* knl_searchFreeArea( IMACB *imacb, W blksz );

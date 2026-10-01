@@ -4,9 +4,11 @@
 #include "kernel.h"
 #include <tm/tmonitor.h>
 #include "sysdepend.h"
+#include "riscv_board.h"
 
 EXPORT void knl_startup_hw(void)
 {
+	knl_riscv_timer_init();
 	/* Set Trap Vector to knl_trap_handler */
 	extern void knl_trap_handler(void);
 	asm volatile("csrw mtvec, %0" :: "r"(knl_trap_handler));

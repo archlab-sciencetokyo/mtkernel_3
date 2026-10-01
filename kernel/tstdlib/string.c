@@ -75,6 +75,19 @@ void* knl_memcpy( void *dst, const void *src, SZ n )
 	return dst;
 }
 
+/* Freestanding RISC-V links do not provide the compiler's libc entry
+ * points.  Keep the kernel implementations available under the conventional
+ * names used by compiler-generated calls as well. */
+void* memset( void *s, int c, SZ n )
+{
+	return knl_memset(s, c, n);
+}
+
+void* memcpy( void *dst, const void *src, SZ n )
+{
+	return knl_memcpy(dst, src, n);
+}
+
 /* strlen : get text string length */
 SZ knl_strlen( const char *s )
 {

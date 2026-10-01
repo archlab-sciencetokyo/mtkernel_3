@@ -7,7 +7,11 @@
 
 #define TCB_tskid	8
 #define TCB_tskatr	16
+#if RISCV_XLEN == 64
+#define TCB_tskctxb	48
+#else
 #define TCB_tskctxb	24
+#endif
 #define TCB_state	39
 
 #define CTXB_ssp	0

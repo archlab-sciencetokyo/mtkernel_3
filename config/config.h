@@ -160,8 +160,13 @@
 /* Use Co-Processor.
  *  1: Valid  0: Invalid
  */
+#if defined(_IOTE_RISCV_)
+#define	USE_FPU			(0)	/* RISC-V port has no FPU context */
+#define	USE_DSP			(0)	/* RISC-V port has no DSP context */
+#else
 #define	USE_FPU			(1)	/* Use FPU */
 #define	USE_DSP			(0)	/* Use DSP */
+#endif
 
 #define	ALWAYS_FPU_ATR		(1)	/* Always set the TA_FPU attribute on all tasks */
 
@@ -169,7 +174,11 @@
 /* Use Physical timer.
  *  1: Valid  0: Invalid
  */
-#define USE_PTMR		(0)	/* Use Physical timer */
+#if defined(_IOTE_RISCV_)
+#define USE_PTMR		(0)	/* RISC-V physical timer API is not implemented */
+#else
+#define USE_PTMR		(1)	/* Use Physical timer */
+#endif
 
 /*---------------------------------------------------------------------- */
 /* Use Sample device driver.

@@ -2,6 +2,23 @@
 #include "../../../sysdepend.h"
 
 #include "cpu_task.h"
+#include "offset.h"
+#include <stddef.h>
+
+_Static_assert(offsetof(TCB, tskctxb) == TCB_tskctxb,
+	"RISC-V assembly TCB_tskctxb offset is stale");
+_Static_assert(sizeof(void *) == RISCV_REG_BYTES,
+	"RISC-V ABI pointer width does not match XLEN");
+_Static_assert(sizeof(T_REGS) == (31 * RISCV_REG_BYTES),
+	"RISC-V T_REGS layout mismatch");
+_Static_assert(sizeof(T_EIT) == (2 * RISCV_REG_BYTES),
+	"RISC-V T_EIT layout mismatch");
+_Static_assert(sizeof(T_CREGS) == RISCV_REG_BYTES,
+	"RISC-V T_CREGS layout mismatch");
+_Static_assert(sizeof(SStackFrame) == (RISCV_CONTEXT_REGS * RISCV_REG_BYTES),
+	"RISC-V context frame layout mismatch");
+_Static_assert(_Alignof(SStackFrame) >= RISCV_CONTEXT_ALIGN,
+	"RISC-V context frame alignment mismatch");
 
 /* Temporal stack used when 'dispatch_to_schedtsk' is called */
 Noinit(EXPORT UB knl_tmp_stack[TMP_STACK_SIZE]);
@@ -27,7 +44,7 @@ EXPORT void knl_set_reg( TCB *tcb, CONST T_REGS *regs, CONST T_EIT *eit, CONST T
 	}
 
 	if ( eit != NULL ) {
-		ssp->pc = (UW)eit->pc;
+		ssp->pc = (RISCV_CTX_REG)eit->pc;
 		ssp->mstatus = eit->mstatus;
 	}
 
@@ -54,7 +71,7 @@ EXPORT void knl_get_reg( TCB *tcb, T_REGS *regs, T_EIT *eit, T_CREGS *cregs )
 	}
 
 	if ( eit != NULL ) {
-		eit->pc       = (void*)ssp->pc;
+		eit->pc       = (void*)(unsigned long)ssp->pc;
 		eit->mstatus  = ssp->mstatus;
 	}
 

@@ -190,7 +190,7 @@ LOCAL	void	tm_vsprintf( OutFn ostr, OutPar *par, const UB *fmt, va_list ap )
 						cbe : outint(cbe, v, base);
 			break;
 		case 'p':
-			v = (UW)va_arg(ap, void *);
+				v = (UW)(unsigned long)va_arg(ap, void *);
 			if (v != 0) {
 				base = 16 | 0x80;
 				wid -= 2;

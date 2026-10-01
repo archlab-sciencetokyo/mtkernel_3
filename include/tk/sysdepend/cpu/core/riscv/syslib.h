@@ -4,14 +4,14 @@
 #include <tk/errno.h>
 #include <sys/sysdef.h>
 
-Inline UW disint(void)
+Inline unsigned long disint(void)
 {
-	UW mstatus;
-	asm volatile("csrrci %0, mstatus, 8" : "=r"(mstatus)); /* Clear MIE (bit 3) */
+	unsigned long mstatus;
+	asm volatile("csrrci %0, mstatus, 8" : "=r"(mstatus));
 	return mstatus;
 }
 
-Inline void restore_mstatus(UW mstatus)
+Inline void restore_mstatus(unsigned long mstatus)
 {
 	if (mstatus & 8) {
 		asm volatile("csrrs x0, mstatus, 8"); /* Set MIE */

@@ -2,6 +2,8 @@
 #include "../../../sysdepend.h"
 
 #include <stddef.h>
+#include <sys/sysdef.h>
+#include "../../../iote_riscv/riscv_board.h"
 
 EXPORT	W	knl_int_nest = 0;	/* Interrupt nest counter */
 
@@ -14,9 +16,11 @@ EXPORT void knl_interrupt_handler(UW intno)
 {
 	FP	inthdr;
 
-	if (intno == 7) {
+	if (intno == RISCV_MCAUSE_MTI) {
 		/* Machine Timer Interrupt (MTIP) */
 		knl_timer_handler();
+	} else if (intno == RISCV_MCAUSE_MEI) {
+		knl_riscv_external_interrupt(intno);
 	} else if (intno < 32) {
 		inthdr = knl_inthdr_tbl[intno];
 		if (inthdr != NULL) {

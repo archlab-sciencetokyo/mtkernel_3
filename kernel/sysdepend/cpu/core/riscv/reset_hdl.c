@@ -43,7 +43,7 @@ EXPORT void Reset_Handler(void)
 #else 
 	top = (UW*)&__bss_start;
 #endif
-	for(i = ((INT)&__bss_end - (INT)top)/sizeof(UW); i > 0 ; i--) {
+	for(i = (INT)((unsigned long)&__bss_end - (unsigned long)top)/sizeof(UW); i > 0 ; i--) {
 		*top++ = 0;
 	}
 
@@ -54,7 +54,7 @@ EXPORT void Reset_Handler(void)
 	} else {
 		knl_lowmem_top = (UW*)SYSTEMAREA_TOP;
 	}
-	if((UW)knl_lowmem_top < (UW)&__bss_end) {
+	if((unsigned long)knl_lowmem_top < (unsigned long)&__bss_end) {
 		knl_lowmem_top = (UW*)&__bss_end;
 	}
 
@@ -66,7 +66,11 @@ EXPORT void Reset_Handler(void)
 #endif
 
 	/* Startup Kernel */
+#if ADD_PREFIX_MAIN_FUNC
+	knl_main();	/* No return */
+#else
 	main();		/* No return */
+#endif
 	while(1);	/* guard - infinite loops */
 }
 

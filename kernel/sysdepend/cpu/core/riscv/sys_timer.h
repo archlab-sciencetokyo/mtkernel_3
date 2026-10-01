@@ -1,76 +1,41 @@
 #ifndef _SYSDEPEND_CPU_CORE_SYSTIMER_
 #define _SYSDEPEND_CPU_CORE_SYSTIMER_
 
-#define CLINT_MTIME_L		(*((volatile _UW*)0x6000bff8))
-#define CLINT_MTIME_H		(*((volatile _UW*)0x6000bffc))
-#define CLINT_MTIMECMP_L	(*((volatile _UW*)0x60004000))
-#define CLINT_MTIMECMP_H	(*((volatile _UW*)0x60004004))
+#include <tk/typedef.h>
+#include <sys/sysdef.h>
+#include "../../../iote_riscv/riscv_board.h"
 
-/* Timer tick count: Assuming 1MHz timer clock (1000 ticks = 1ms) */
-#define TIMER_TICK_DIV		(1000000 / (1000 / TIMER_PERIOD))
+#define TIMER_TICK_DIV (RISCV_TIMER_HZ / (1000 / TIMER_PERIOD))
 
-/*
- * Timer start processing
- */
 Inline void knl_start_hw_timer( void )
 {
-	UINT	imask;
-
+	UINT imask;
 	DI(imask);
-
-	/* Set first compare value */
-	UW low = CLINT_MTIME_L;
-	UW high = CLINT_MTIME_H;
-
-	UW next_low = low + TIMER_TICK_DIV;
-	UW next_high = high + (next_low < low ? 1 : 0);
-
-	CLINT_MTIMECMP_L = 0xFFFFFFFF; /* prevent spurious interrupt */
-	CLINT_MTIMECMP_H = next_high;
-	CLINT_MTIMECMP_L = next_low;
-
-	/* Enable Machine Timer Interrupt (MTIE = bit 7 in mie) */
-	asm volatile("csrs mie, %0" :: "r"(1 << 7));
-
+	knl_riscv_timer_set_compare(knl_riscv_timer_read() + (UD)TIMER_TICK_DIV);
+	asm volatile("csrs mie, %0" :: "r"((unsigned long)RISCV_MIE_MTIE) : "memory");
 	EI(imask);
 }
 
-/*
- * Clear timer interrupt
- */
 Inline void knl_clear_hw_timer_interrupt( void )
 {
-	UW low = CLINT_MTIME_L;
-	UW high = CLINT_MTIME_H;
-
-	UW next_low = low + TIMER_TICK_DIV;
-	UW next_high = high + (next_low < low ? 1 : 0);
-
-	CLINT_MTIMECMP_L = 0xFFFFFFFF;
-	CLINT_MTIMECMP_H = next_high;
-	CLINT_MTIMECMP_L = next_low;
+	knl_riscv_timer_set_compare(knl_riscv_timer_read() + (UD)TIMER_TICK_DIV);
 }
 
 Inline void knl_end_of_hw_timer_interrupt( void )
 {
-	/* No processing */
 }
 
-/*
- * Timer stop processing
- */
 Inline void knl_terminate_hw_timer( void )
 {
-	/* Disable Machine Timer Interrupt (MTIE = bit 7 in mie) */
-	asm volatile("csrc mie, %0" :: "r"(1 << 7));
+	asm volatile("csrc mie, %0" :: "r"((unsigned long)RISCV_MIE_MTIE) : "memory");
 }
 
-/*
- * Get processing time from the previous timer interrupt to current (nanosecond)
- */
 Inline UW knl_get_hw_timer_nsec( void )
 {
-	return 0;
+	UW ticks = (UW)knl_riscv_timer_read();
+	return (UW)((ticks / RISCV_TIMER_NS_DEN) * RISCV_TIMER_NS_NUM
+		+ ((ticks % RISCV_TIMER_NS_DEN) * RISCV_TIMER_NS_NUM)
+		/ RISCV_TIMER_NS_DEN);
 }
 
 #endif /* _SYSDEPEND_CPU_CORE_SYSTIMER_ */

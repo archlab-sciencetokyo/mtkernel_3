@@ -51,9 +51,15 @@ typedef struct task_control_block	TCB;
 #define SYSCALL		EXPORT		/* Definition of system call */
 
 /* User defined handler ( Sub-system calls, time-event handler ) */
-# define CallUserHandlerP1(   p1,         hdr, cb)	(*(void(*)(UW))(hdr))((UW)(p1))
-# define CallUserHandlerP2(   p1, p2,     hdr, cb)	(*(void(*)(UW,UW))(hdr))((UW)(p1), (UW)(p2))
-# define CallUserHandlerP3(   p1, p2, p3, hdr, cb)	(*(void(*)(UW,UW,UW))(hdr))((UW)(p1), (UW)(p2), (UW)(p3))
+#if defined(CPU_CORE_RISCV)
+/* Keep pointer-valued exinf arguments full-width on RV64. */
+# define KNL_HANDLER_WORD unsigned long
+#else
+# define KNL_HANDLER_WORD UW
+#endif
+# define CallUserHandlerP1(   p1,         hdr, cb)	(*(void(*)(KNL_HANDLER_WORD))(hdr))((KNL_HANDLER_WORD)(p1))
+# define CallUserHandlerP2(   p1, p2,     hdr, cb)	(*(void(*)(KNL_HANDLER_WORD,KNL_HANDLER_WORD))(hdr))((KNL_HANDLER_WORD)(p1), (KNL_HANDLER_WORD)(p2))
+# define CallUserHandlerP3(   p1, p2, p3, hdr, cb)	(*(void(*)(KNL_HANDLER_WORD,KNL_HANDLER_WORD,KNL_HANDLER_WORD))(hdr))((KNL_HANDLER_WORD)(p1), (KNL_HANDLER_WORD)(p2), (KNL_HANDLER_WORD)(p3))
 
 /*
  * Task control block (TCB)

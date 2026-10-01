@@ -2,14 +2,21 @@
 #define _SYSDEPEND_CPU_CORE_CPUTASK_
 
 #include <string.h>
+#include <sys/sysdef.h>
+
+#if RISCV_XLEN == 64
+typedef UD RISCV_CTX_REG;
+#else
+typedef UW RISCV_CTX_REG;
+#endif
 
 /*
  * System stack configuration at task startup
  */
 typedef struct {
-	UW	pc;		/* Program counter (mepc) */
-	UW	mstatus;	/* Machine status register (mstatus) */
-	UW	r[31];		/* General registers x1 - x31 */
+	RISCV_CTX_REG	pc;		/* Program counter (mepc) */
+	RISCV_CTX_REG	mstatus;	/* Machine status register (mstatus) */
+	RISCV_CTX_REG	r[31];		/* General registers x1 - x31 */
 } SStackFrame;
 
 /*
@@ -32,10 +39,10 @@ Inline void knl_setup_context( TCB *tcb )
 	memset(ssp, 0, sizeof(SStackFrame));
 
 	/* CPU context initialization */
-	ssp->pc		= (UW)tcb->task;			/* Task startup address */
-	ssp->mstatus	= 0x1880;				/* MPP = 3 (Machine Mode), MPIE = 1 */
+	ssp->pc		= (RISCV_CTX_REG)tcb->task;		/* Task startup address */
+	ssp->mstatus	= RISCV_MSTATUS_MPP | RISCV_MSTATUS_MPIE;
 	ssp->r[0]	= 0;					/* ra = 0 */
-	ssp->r[1]	= (UW)ssp;				/* sp = ssp */
+	ssp->r[1]	= (RISCV_CTX_REG)ssp;			/* sp = ssp */
 
 	UW gp_val;
 	__asm__ volatile ("mv %0, gp" : "=r"(gp_val));
@@ -54,8 +61,8 @@ Inline void knl_setup_stacd( TCB *tcb, INT stacd )
 	
 	ssp = (SStackFrame*)tcb->tskctxb.ssp;
 
-	ssp->r[9] = stacd;		/* a0 (x10) = stacd */
-	ssp->r[10] = (UW)tcb->exinf;	/* a1 (x11) = exinf */
+	ssp->r[9] = (RISCV_CTX_REG)stacd;		/* a0 (x10) = stacd */
+	ssp->r[10] = (RISCV_CTX_REG)tcb->exinf;	/* a1 (x11) = exinf */
 }
 
 /*

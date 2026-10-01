@@ -13,9 +13,8 @@ EXPORT INT GetCpuIntLevel( void )
 	return INTLEVEL_EI;
 }
 
-/*
- * Physical Timer Stubs
- */
+/* Physical timer API is compiled only for targets that advertise it. */
+#if USE_PTMR
 EXPORT ER StartPhysicalTimer( UINT ptmrno, UW limit, UINT mode )
 {
 	return E_NOSPT;
@@ -40,5 +39,6 @@ EXPORT ER GetPhysicalTimerConfig( UINT ptmrno, T_RPTMR *pk_rptmr )
 {
 	return E_NOSPT;
 }
+#endif /* USE_PTMR */
 
 #endif /* CPU_CORE_RISCV */

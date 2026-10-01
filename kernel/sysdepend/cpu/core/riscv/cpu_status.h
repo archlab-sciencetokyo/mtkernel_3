@@ -5,6 +5,7 @@
 #include <sys/sysdef.h>
 
 #include "sysdepend.h"
+#include <sys/sysdef.h>
 
 /*
  * Start/End critical section
@@ -26,7 +27,7 @@
 /*
  * Interrupt enable/disable
  */
-#define ENABLE_INTERRUPT	{ asm volatile("csrrs x0, mstatus, 8"); }
+#define ENABLE_INTERRUPT	{ asm volatile("csrrs x0, mstatus, %0" :: "r"((unsigned long)RISCV_MSTATUS_MIE) : "memory"); }
 #define DISABLE_INTERRUPT	{ disint(); }
 
 /*
@@ -72,7 +73,7 @@ Inline void knl_LeaveTaskIndependent( void )
 /* Helper to check if interrupts are disabled */
 Inline BOOL knl_check_di(void)
 {
-	UW mstatus;
+	unsigned long mstatus;
 	asm volatile("csrr %0, mstatus" : "=r"(mstatus));
 	return (mstatus & 8) == 0;
 }

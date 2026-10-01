@@ -6,18 +6,48 @@ GCC := riscv64-unknown-elf-gcc
 AS := riscv64-unknown-elf-gcc
 LINK := riscv64-unknown-elf-gcc
 
-CFLAGS := -march=rv32imac_zicsr -mabi=ilp32 -ffreestanding \
+# Select the target width and ABI at invocation time, for example:
+#   make -C build_make RISCV_XLEN=64 RISCV_MABI=lp64
+RISCV_XLEN ?= 32
+RISCV_MARCH ?= rv$(RISCV_XLEN)ima_zicsr_zifencei_zicntr
+RISCV_MABI ?= $(if $(filter 64,$(RISCV_XLEN)),lp64,ilp32)
+RISCV_BOARD ?= clint
+
+ifeq ($(filter clint rvcomp,$(RISCV_BOARD)),)
+$(error RISCV_BOARD must be clint or rvcomp)
+endif
+ifeq ($(RISCV_BOARD),rvcomp)
+RISCV_BOARD_DEFS := -DRISCV_BOARD_RVCOMP -DRISCV_TIMER_HZ=150000000U
+endif
+
+ifeq ($(filter 32 64,$(RISCV_XLEN)),)
+$(error RISCV_XLEN must be 32 or 64)
+endif
+ifeq ($(RISCV_XLEN),32)
+ifneq ($(RISCV_MABI),ilp32)
+$(error RV32 requires RISCV_MABI=ilp32)
+endif
+endif
+ifeq ($(RISCV_XLEN),64)
+ifneq ($(RISCV_MABI),lp64)
+$(error RV64 requires RISCV_MABI=lp64)
+endif
+endif
+
+RISCV_FLAGS := -march=$(RISCV_MARCH) -mabi=$(RISCV_MABI) -mcmodel=medany
+
+CFLAGS := $(RISCV_FLAGS) $(RISCV_BOARD_DEFS) -ffreestanding \
     -std=gnu11 \
     -O0 -g3 \
     -MMD -MP \
 
-ASFLAGS := -march=rv32imac_zicsr -mabi=ilp32 -ffreestanding \
+ASFLAGS := $(RISCV_FLAGS) $(RISCV_BOARD_DEFS) -ffreestanding \
     -x assembler-with-cpp \
     -O0 -g3 \
     -MMD -MP \
 
-LFLAGS := -march=rv32imac_zicsr -mabi=ilp32 -ffreestanding \
-    -nostartfiles \
+LFLAGS := $(RISCV_FLAGS) -ffreestanding \
+    -nostartfiles -nostdlib \
     -O0 -g3 \
 
 LNKFILE := "../etc/linker/iote_riscv/tkernel_map.ld"

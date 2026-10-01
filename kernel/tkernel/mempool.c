@@ -99,7 +99,7 @@ LOCAL void knl_appendFreeAreaBound( MPLCB *mplcb, QUEUE *aq )
 		/* FreeQue Size order */
 		QueInsert(top, fq);
 		(top + 1)->next = NULL;
-		(top + 1)->prev = (QUEUE*)size;
+		(top + 1)->prev = (QUEUE*)(unsigned long)size;
 	}
 }
 
