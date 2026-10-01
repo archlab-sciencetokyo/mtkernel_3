@@ -13,7 +13,7 @@
 #include <tk/typedef.h>
 #include <sys/sysdef.h>
 
-#ifdef RISCV_BOARD_RVCOMP
+#if defined(RISCV_BOARD_RVCOMP)
 #define RISCV_CLINT_BASE	0x02000000UL
 #define RISCV_PLIC_BASE	0x0c000000UL
 #define RISCV_TIMER_NS_NUM	20U
@@ -21,7 +21,7 @@
 #ifndef RISCV_TIMER_HZ
 #define RISCV_TIMER_HZ	150000000U
 #endif
-#else
+#else /* RISCV_BOARD_SIMRV / default */
 #define RISCV_CLINT_BASE	0x60000000UL
 #define RISCV_PLIC_BASE	0x00000000UL
 #define RISCV_TIMER_NS_NUM	1000U

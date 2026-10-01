@@ -11,10 +11,17 @@ LINK := riscv64-unknown-elf-gcc
 RISCV_XLEN ?= 32
 RISCV_MARCH ?= rv$(RISCV_XLEN)ima_zicsr_zifencei_zicntr
 RISCV_MABI ?= $(if $(filter 64,$(RISCV_XLEN)),lp64,ilp32)
-RISCV_BOARD ?= clint
+RISCV_BOARD ?= simrv
 
-ifeq ($(filter clint rvcomp,$(RISCV_BOARD)),)
-$(error RISCV_BOARD must be clint or rvcomp)
+ifeq ($(RISCV_BOARD),clint)
+RISCV_BOARD := simrv
+endif
+
+ifeq ($(filter simrv rvcomp,$(RISCV_BOARD)),)
+$(error RISCV_BOARD must be simrv or rvcomp)
+endif
+ifeq ($(RISCV_BOARD),simrv)
+RISCV_BOARD_DEFS := -DRISCV_BOARD_SIMRV -DRISCV_TIMER_HZ=1000000U
 endif
 ifeq ($(RISCV_BOARD),rvcomp)
 RISCV_BOARD_DEFS := -DRISCV_BOARD_RVCOMP -DRISCV_TIMER_HZ=150000000U

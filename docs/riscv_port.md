@@ -34,7 +34,8 @@ hooks.
 `kernel/sysdepend/iote_riscv/riscv_board.h` separates the generic port from a BSP.
 A board implementation provides a monotonic timer read, timer compare programming,
 timer initialization, and external interrupt-controller dispatch. The default
-implementation is CLINT-compatible. The `RISCV_BOARD=rvcomp` profile selects RVComp's
+implementation is SimRV (`RISCV_BOARD=simrv`), with CLINT at `0x60000000`, 1 MHz timer
+base, and standard 16550 UART. The `RISCV_BOARD=rvcomp` profile selects RVComp's
 CLINT at `0x02000000`, PLIC at `0x0c000000`, and 150 MHz timer base. Its
 external-interrupt hook claims and completes PLIC sources for machine context 0;
 source priority/enable policy remains the responsibility of device initialization.

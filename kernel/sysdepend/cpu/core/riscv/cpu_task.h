@@ -1,7 +1,7 @@
 #ifndef _SYSDEPEND_CPU_CORE_CPUTASK_
 #define _SYSDEPEND_CPU_CORE_CPUTASK_
 
-#include <string.h>
+#include <tstdlib.h>
 #include <sys/sysdef.h>
 
 #if RISCV_XLEN == 64
@@ -36,7 +36,7 @@ Inline void knl_setup_context( TCB *tcb )
 	ssp--;
 
 	/* Clear CPU context */
-	memset(ssp, 0, sizeof(SStackFrame));
+	knl_memset(ssp, 0, sizeof(SStackFrame));
 
 	/* CPU context initialization */
 	ssp->pc		= (RISCV_CTX_REG)tcb->task;		/* Task startup address */
