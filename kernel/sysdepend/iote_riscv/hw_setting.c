@@ -32,13 +32,31 @@ EXPORT ER knl_restart_hw( W mode )
 	switch(mode) {
 	case -1: /* Reset and re-start */
 		SYSTEM_MESSAGE("\n<< SYSTEM RESET & RESTART >>\n");
+#if defined(RISCV_BOARD_RVCOMP)
+		disint();
+		*(volatile unsigned int*)RISCV_RESET_REG = 1U;
+		while(1) { asm volatile("wfi"); }
+#else
 		return E_NOSPT;
+#endif
 	case -2: /* fast re-start */
 		SYSTEM_MESSAGE("\n<< SYSTEM FAST RESTART >>\n");
+#if defined(RISCV_BOARD_RVCOMP)
+		disint();
+		*(volatile unsigned int*)RISCV_RESET_REG = 1U;
+		while(1) { asm volatile("wfi"); }
+#else
 		return E_NOSPT;
+#endif
 	case -3: /* Normal re-start */
 		SYSTEM_MESSAGE("\n<< SYSTEM RESTART >>\n");
+#if defined(RISCV_BOARD_RVCOMP)
+		disint();
+		*(volatile unsigned int*)RISCV_RESET_REG = 1U;
+		while(1) { asm volatile("wfi"); }
+#else
 		return E_NOSPT;
+#endif
 	default:
 		return E_PAR;
 	}

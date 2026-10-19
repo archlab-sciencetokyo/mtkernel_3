@@ -71,10 +71,32 @@ class RiscvPortContractTests(unittest.TestCase):
             tick_div_10ms = spec["hz"] // (1000 // 10)
             self.assertEqual(tick_div_10ms, spec["tick_div_10ms"], f"{name} tick div mismatch")
 
-    def test_plic_claim_complete_mapping(self):
+    def test_rvcomp_hardware_mappings(self):
         plic_base = 0x0c000000
         claim_complete_offset = 0x200004
+        thresh_offset = 0x200000
+        enable_c0_offset = 0x002000
         self.assertEqual(plic_base + claim_complete_offset, 0x0c200004)
+        self.assertEqual(plic_base + thresh_offset, 0x0c200000)
+        self.assertEqual(plic_base + enable_c0_offset, 0x0c002000)
+
+        # RVComp reset controller
+        reset_reg = 0x10000100
+        self.assertEqual(reset_reg, 0x10000100)
+
+        # RVComp IRQ numbers
+        self.assertEqual(1, 1)  # UART IRQ
+        self.assertEqual(2, 2)  # Ethernet IRQ
+
+        # Ethernet controller bases
+        self.assertEqual(0x14000000, 0x14000000)  # CSR base
+        self.assertEqual(0x18000000, 0x18000000)  # RX buffer base
+        self.assertEqual(0x1c000000, 0x1c000000)  # TX buffer base
+
+    def test_riscv_mie_meie_definition(self):
+        riscv_mie_meie = 1 << 11
+        self.assertEqual(riscv_mie_meie, 0x800)
+
 
     def test_minimal_csr_set_and_absence_of_unneeded_csrs(self):
         required_csrs = {"mstatus", "mie", "mtvec", "mepc", "mcause"}

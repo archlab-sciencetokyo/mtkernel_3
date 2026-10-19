@@ -16,6 +16,15 @@
 #if defined(RISCV_BOARD_RVCOMP)
 #define RISCV_CLINT_BASE	0x02000000UL
 #define RISCV_PLIC_BASE	0x0c000000UL
+#define RISCV_RESET_REG	0x10000100UL
+#define RISCV_PLIC_PRIORITY_REG(s)	(*(volatile UW *)(RISCV_PLIC_BASE + 0x000000UL + 4UL * (s)))
+#define RISCV_PLIC_ENABLE_C0_REG	(*(volatile UW *)(RISCV_PLIC_BASE + 0x002000UL))
+#define RISCV_PLIC_THRESH_C0_REG	(*(volatile UW *)(RISCV_PLIC_BASE + 0x200000UL))
+#define RISCV_IRQ_UART	1U
+#define RISCV_IRQ_ETHER	2U
+#define RISCV_ETHER_CSR_BASE	0x14000000UL
+#define RISCV_ETHER_RXBUF_BASE	0x18000000UL
+#define RISCV_ETHER_TXBUF_BASE	0x1c000000UL
 #define RISCV_TIMER_NS_NUM	20U
 #define RISCV_TIMER_NS_DEN	3U
 #ifndef RISCV_TIMER_HZ
@@ -37,5 +46,8 @@ IMPORT UD knl_riscv_timer_read(void);
 IMPORT void knl_riscv_timer_set_compare(UD value);
 IMPORT void knl_riscv_timer_init(void);
 IMPORT void knl_riscv_external_interrupt(UW cause);
+IMPORT void knl_riscv_plic_enable(UW source, UW priority);
+IMPORT void knl_riscv_plic_disable(UW source);
+IMPORT void knl_riscv_plic_set_threshold(UW threshold);
 
 #endif /* _IOTE_RISCV_BOARD_H_ */

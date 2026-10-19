@@ -19,6 +19,7 @@
 #define RISCV_MSTATUS_MPIE     (1UL << 7)
 #define RISCV_MSTATUS_MPP      (3UL << 11)
 #define RISCV_MIE_MTIE         (1UL << 7)
+#define RISCV_MIE_MEIE         (1UL << 11)
 #define RISCV_MCAUSE_INT       (1UL << (RISCV_XLEN - 1))
 #define RISCV_MCAUSE_CODE_MASK (RISCV_MCAUSE_INT - 1)
 #define RISCV_MCAUSE_MTI       7

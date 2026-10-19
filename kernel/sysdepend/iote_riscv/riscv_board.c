@@ -71,6 +71,47 @@ EXPORT void knl_riscv_external_interrupt(UW cause)
 
 EXPORT void knl_riscv_timer_init(void)
 {
+#if RISCV_PLIC_BASE != 0
+	/* Initialize PLIC for Machine Mode Context 0 */
+	RISCV_PLIC_THRESH_C0_REG = 0U;	/* Accept all enabled priorities */
+	RISCV_PLIC_ENABLE_C0_REG = 0U;	/* Clear all source enables initially */
+	/* Enable Machine External Interrupts in mie CSR */
+	asm volatile("csrs mie, %0" :: "r"((unsigned long)RISCV_MIE_MEIE) : "memory");
+#endif
+}
+
+EXPORT void knl_riscv_plic_enable(UW source, UW priority)
+{
+#if RISCV_PLIC_BASE != 0
+	if (source != 0U && source < 32U) {
+		RISCV_PLIC_PRIORITY_REG(source) = priority;
+		RISCV_PLIC_ENABLE_C0_REG |= (1U << source);
+		asm volatile("csrs mie, %0" :: "r"((unsigned long)RISCV_MIE_MEIE) : "memory");
+	}
+#else
+	(void)source;
+	(void)priority;
+#endif
+}
+
+EXPORT void knl_riscv_plic_disable(UW source)
+{
+#if RISCV_PLIC_BASE != 0
+	if (source != 0U && source < 32U) {
+		RISCV_PLIC_ENABLE_C0_REG &= ~(1U << source);
+	}
+#else
+	(void)source;
+#endif
+}
+
+EXPORT void knl_riscv_plic_set_threshold(UW threshold)
+{
+#if RISCV_PLIC_BASE != 0
+	RISCV_PLIC_THRESH_C0_REG = threshold;
+#else
+	(void)threshold;
+#endif
 }
 
 #endif /* IOTE_RISCV */

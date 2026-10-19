@@ -3,14 +3,33 @@
 
 #include <tk/tkernel.h>
 
+#ifdef RISCV_BOARD_RVCOMP
+#define PLIC_THRESH_C0	(*(volatile unsigned int *)0x0c200000UL)
+#endif
+
 EXPORT void SetCpuIntLevel( INT level )
 {
+#ifdef RISCV_BOARD_RVCOMP
+	/* PLIC Context 0 priority threshold: only interrupts with priority > threshold trigger */
+	if (level < 0) {
+		level = 0;
+	} else if (level > 15) {
+		level = 15;
+	}
+	PLIC_THRESH_C0 = (unsigned int)level;
+#else
 	/* No CPU interrupt level priority gating on generic RISC-V */
+	(void)level;
+#endif
 }
 
 EXPORT INT GetCpuIntLevel( void )
 {
+#ifdef RISCV_BOARD_RVCOMP
+	return (INT)PLIC_THRESH_C0;
+#else
 	return INTLEVEL_EI;
+#endif
 }
 
 /* Physical timer API is compiled only for targets that advertise it. */
