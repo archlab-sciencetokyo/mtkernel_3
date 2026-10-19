@@ -21,10 +21,19 @@ LOCAL UD rdtime_value(void)
 #endif
 }
 
+#ifndef RISCV_TIMER_TICKS_PER_USEC
+# ifdef RISCV_TIMER_HZ
+#  define RISCV_TIMER_TICKS_PER_USEC (RISCV_TIMER_HZ / 1000000U)
+# else
+#  define RISCV_TIMER_TICKS_PER_USEC 1U
+# endif
+#endif
+
 EXPORT void WaitUsec( UW usec )
 {
 	UD start = rdtime_value();
-	while ((rdtime_value() - start) < (UD)usec);
+	UD ticks = (UD)usec * (UD)RISCV_TIMER_TICKS_PER_USEC;
+	while ((rdtime_value() - start) < ticks);
 }
 
 EXPORT void WaitNsec( UW nsec )

@@ -31,6 +31,8 @@
 #endif
 #endif
 
+#define RISCV_TIMER_TICKS_PER_USEC	(RISCV_TIMER_HZ / 1000000U)
+
 IMPORT UD knl_riscv_timer_read(void);
 IMPORT void knl_riscv_timer_set_compare(UD value);
 IMPORT void knl_riscv_timer_init(void);

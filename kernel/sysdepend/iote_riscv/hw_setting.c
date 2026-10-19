@@ -18,8 +18,12 @@ EXPORT void knl_startup_hw(void)
 EXPORT void knl_shutdown_hw( void )
 {
 	disint();
+#if defined(RISCV_BOARD_SIMRV)
 	*(volatile unsigned int*)0x00100000 = 0x5555;
-	while(1);
+#endif
+	while(1) {
+		asm volatile("wfi");
+	}
 }
 #endif /* USE_SHUTDOWN */
 
